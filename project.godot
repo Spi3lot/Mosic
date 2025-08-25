@@ -18,11 +18,16 @@ config/icon="res://icon.svg"
 [display]
 
 window/size/viewport_width=800
-window/size/viewport_height=600
+window/size/viewport_height=450
 
 [dotnet]
 
 project/assembly_name="Mosic"
+
+[internationalization]
+
+locale/translation_remaps={}
+locale/translations=PackedStringArray("res://assets/translation.de.translation", "res://assets/translation.en.translation")
 
 [physics]
 
