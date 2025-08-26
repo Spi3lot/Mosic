@@ -34,6 +34,8 @@ public partial class Mosic : Control
 
     [Export] public ItemList SearchResultList { get; set; }
 
+    [Export] public OptionButton AudioFormatOptionButton { get; set; }
+
     public override void _Ready()
     {
         SearchBar.GrabFocus();
@@ -42,12 +44,23 @@ public partial class Mosic : Control
 
         SearchResultList.FixedIconSize = DisplayServer.ScreenGetSize() / 10;
         SearchResultList.Connect(ItemList.SignalName.ItemActivated, Callable.From(void (int index) => Download(index)));
+
+        foreach (string formatName in Enum.GetNames<YoutubeDLSharp.Options.AudioConversionFormat>())
+        {
+            AudioFormatOptionButton.AddItem(formatName);
+        }
     }
 
     private async Task Download(int index)
     {
         DownloadProgressBar.Indeterminate = true;
-        await _ytdl.RunAudioDownload(_videos[index].Url, progress: _progress);
+
+        if (!Enum.TryParse<YoutubeDLSharp.Options.AudioConversionFormat>(AudioFormatOptionButton.Text, out var format))
+        {
+            GD.PushError("Audio format option not supported: " + AudioFormatOptionButton.Text);
+        }
+        
+        await _ytdl.RunAudioDownload(_videos[index].Url, format: format, progress: _progress);
         DownloadProgressBar.Indeterminate = false;
     }
 
@@ -62,6 +75,7 @@ public partial class Mosic : Control
         SearchResultList.Clear();
         DownloadProgressBar.Indeterminate = true;
         var result = await _youtubeSearchClient.SearchAsync(query);
+        int index = 0;
 
         foreach (var video in result.Results)
         {
@@ -70,14 +84,19 @@ public partial class Mosic : Control
                 GD.PushWarning(video.ThumbnailUrl + " is probably png");
             }
 
-            var image = new Image();
-            image.LoadJpgFromBuffer(await _httpClient.GetByteArrayAsync(video.ThumbnailUrl));
-
-            string text = $"{video.Title} | {video.Author} | {video.Duration}";
-            SearchResultList.AddItem(text, ImageTexture.CreateFromImage(image));
             _videos.Add(video);
+            SearchResultList.AddItem($"{video.Title} | {video.Author} | {video.Duration}");
+            FetchAndSetThumbnail(index, video.ThumbnailUrl);
+            index++;
         }
 
         DownloadProgressBar.Indeterminate = false;
+    }
+
+    private async Task FetchAndSetThumbnail(int index, string thumbnailUrl)
+    {
+        var image = new Image();
+        image.LoadJpgFromBuffer(await _httpClient.GetByteArrayAsync(thumbnailUrl));
+        SearchResultList.SetItemIcon(index, ImageTexture.CreateFromImage(image));
     }
 }
