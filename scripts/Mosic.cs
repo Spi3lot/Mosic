@@ -12,9 +12,9 @@ public partial class Mosic : Control
 
     private readonly System.Net.Http.HttpClient _httpClient = new();
 
-    private readonly IList<YoutubeVideo> _videos = [];
-
     private readonly YoutubeDLSharp.YoutubeDL _ytdl = new();
+
+    private readonly IList<YoutubeVideo> _videos = [];
 
     private readonly IProgress<YoutubeDLSharp.DownloadProgress> _progress;
 
@@ -28,40 +28,46 @@ public partial class Mosic : Control
         _youtubeSearchClient = new(_httpClient);
     }
 
-    [Export] public LineEdit SearchBar { get; set; }
+    [Export]
+    public LineEdit SearchBar { get; set; }
 
-    [Export] public ProgressBar DownloadProgressBar { get; set; }
+    [Export]
+    public ProgressBar DownloadProgressBar { get; set; }
 
-    [Export] public ItemList SearchResultList { get; set; }
+    [Export]
+    public ItemList SearchResultList { get; set; }
 
-    [Export] public OptionButton AudioFormatOptionButton { get; set; }
+    [Export]
+    public OptionButton FormatOptionButton { get; set; }
+
+    [Export]
+    public CheckButton UrlCheckButton { get; set; }
+
+    [Export]
+    public CheckButton VideoCheckButton { get; set; }
+
+    [Export]
+    [ExportGroup("Download Path")]
+    public Button DownloadPathDialogButton { get; set; }
+    
+    [Export]
+    public FileDialog DownloadPathDialog { get; set; }
 
     public override void _Ready()
     {
         SearchBar.GrabFocus();
-        SearchBar.Connect(LineEdit.SignalName.TextSubmitted, Callable.From(void (string query) => Search(query)));
-        SearchBar.PlaceholderText = Tr("SEARCH");
-
-        SearchResultList.FixedIconSize = DisplayServer.ScreenGetSize() / 10;
-        SearchResultList.Connect(ItemList.SignalName.ItemActivated, Callable.From(void (int index) => Download(index)));
-
-        foreach (string formatName in Enum.GetNames<YoutubeDLSharp.Options.AudioConversionFormat>())
-        {
-            AudioFormatOptionButton.AddItem(formatName);
-        }
-    }
-
-    private async Task Download(int index)
-    {
-        DownloadProgressBar.Indeterminate = true;
-
-        if (!Enum.TryParse<YoutubeDLSharp.Options.AudioConversionFormat>(AudioFormatOptionButton.Text, out var format))
-        {
-            GD.PushError("Audio format option not supported: " + AudioFormatOptionButton.Text);
-        }
+        SearchBar.TextSubmitted += query => _ = Search(query);
         
-        await _ytdl.RunAudioDownload(_videos[index].Url, format: format, progress: _progress);
-        DownloadProgressBar.Indeterminate = false;
+        SearchResultList.FixedIconSize = DisplayServer.ScreenGetSize() / 10;
+        SearchResultList.ItemActivated += index => _ = Download((int) index);
+        
+        FillFormatOptionButton(FormatOptionButton.ButtonPressed);
+        VideoCheckButton.Toggled += FillFormatOptionButton;
+        
+        UrlCheckButton.Toggled += toggledOn => SearchBar.PlaceholderText = (toggledOn) ? "URL" : "SEARCH";
+
+        DownloadPathDialogButton.Text = SceneFilePath;
+        DownloadPathDialogButton.Pressed += () => DownloadPathDialog.PopupCentered();
     }
 
     private async Task Search(string query)
@@ -79,14 +85,9 @@ public partial class Mosic : Control
 
         foreach (var video in result.Results)
         {
-            if (video.ThumbnailUrl.Contains("png", StringComparison.OrdinalIgnoreCase))
-            {
-                GD.PushWarning(video.ThumbnailUrl + " is probably png");
-            }
-
             _videos.Add(video);
             SearchResultList.AddItem($"{video.Title} | {video.Author} | {video.Duration}");
-            FetchAndSetThumbnail(index, video.ThumbnailUrl);
+            _ = FetchAndSetThumbnail(index, video.ThumbnailUrl);
             index++;
         }
 
@@ -98,5 +99,42 @@ public partial class Mosic : Control
         var image = new Image();
         image.LoadJpgFromBuffer(await _httpClient.GetByteArrayAsync(thumbnailUrl));
         SearchResultList.SetItemIcon(index, ImageTexture.CreateFromImage(image));
+    }
+
+    private async Task Download(int index)
+    {
+        DownloadProgressBar.Indeterminate = true;
+
+        if (VideoCheckButton.ButtonPressed)
+        {
+            var format = (YoutubeDLSharp.Options.VideoRecodeFormat) FormatOptionButton.Selected;
+            await _ytdl.RunVideoDownload(_videos[index].Url, recodeFormat: format, progress: _progress);
+        }
+        else
+        {
+            var format = (YoutubeDLSharp.Options.AudioConversionFormat) FormatOptionButton.Selected;
+            await _ytdl.RunAudioDownload(_videos[index].Url, format: format, progress: _progress);
+        }
+
+        DownloadProgressBar.Indeterminate = false;
+    }
+    
+    private void FillFormatOptionButton(bool toggledOn)
+    {
+        string[] names = (toggledOn)
+            ? Enum.GetNames<YoutubeDLSharp.Options.VideoRecodeFormat>()
+            : Enum.GetNames<YoutubeDLSharp.Options.AudioConversionFormat>();
+
+        FormatOptionButton.Clear();
+
+        foreach (string formatName in names)
+        {
+            FormatOptionButton.AddItem(formatName);
+        }
+        
+        if (toggledOn)
+        {
+            FormatOptionButton.SetItemText(0, "Original");
+        }
     }
 }
