@@ -2,6 +2,7 @@ using Godot;
 
 namespace Mosic.scripts;
 
+[Tool]
 public partial class CyclePaddedLabel : Label
 {
 
@@ -18,6 +19,11 @@ public partial class CyclePaddedLabel : Label
 
     public override async void _Ready()
     {
+        if (Engine.IsEditorHint())
+        {
+            return;
+        }
+        
         Text = StaticText;
         await YoutubeDLSharp.Utils.DownloadBinaries();
         CallDeferred(MethodName.Finish);
