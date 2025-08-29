@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Godot;
 using YoutubeSearchApi.Net.Models.Youtube;
@@ -136,7 +137,18 @@ public partial class Mosic : Control
 
         foreach (string formatName in names)
         {
-            FormatOptionButton.AddItem(formatName);
+            string label = formatName;
+
+            if (label == "Vorbis")
+            {
+                label = ".ogg";
+            }
+            else if (FormatOptionButton.ItemCount > 0)
+            {
+                label = $".{formatName.ToLower()}";
+            }
+
+            FormatOptionButton.AddItem(label);
         }
         
         if (toggledOn)
