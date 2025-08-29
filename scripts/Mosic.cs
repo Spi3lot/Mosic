@@ -66,8 +66,15 @@ public partial class Mosic : Control
         
         UrlCheckButton.Toggled += toggledOn => SearchBar.PlaceholderText = (toggledOn) ? "URL" : "SEARCH";
 
-        DownloadPathDialogButton.Text = SceneFilePath;
+        DownloadPathDialogButton.Text = _ytdl.OutputFolder;
         DownloadPathDialogButton.Pressed += () => DownloadPathDialog.PopupCentered();
+
+        DownloadPathDialog.DirSelected += dir =>
+        {
+            string fullPath = Path.GetFullPath(dir);
+            _ytdl.OutputFolder = fullPath;
+            DownloadPathDialogButton.Text = fullPath;
+        };
     }
 
     private async Task Search(string query)
