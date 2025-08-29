@@ -50,7 +50,7 @@ public partial class Mosic : Control
     [Export]
     [ExportGroup("Download Path")]
     public Button DownloadPathDialogButton { get; set; }
-    
+
     [Export]
     public FileDialog DownloadPathDialog { get; set; }
 
@@ -58,13 +58,13 @@ public partial class Mosic : Control
     {
         SearchBar.GrabFocus();
         SearchBar.TextSubmitted += query => _ = Search(query);
-        
+
         SearchResultList.FixedIconSize = DisplayServer.ScreenGetSize() / 10;
         SearchResultList.ItemActivated += index => _ = Download((int) index);
-        
+
         FillFormatOptionButton(FormatOptionButton.ButtonPressed);
         VideoCheckButton.Toggled += FillFormatOptionButton;
-        
+
         UrlCheckButton.Toggled += toggledOn => SearchBar.PlaceholderText = (toggledOn) ? "URL" : "SEARCH";
 
         DownloadPathDialogButton.Text = _ytdl.OutputFolder;
@@ -126,7 +126,7 @@ public partial class Mosic : Control
 
         DownloadProgressBar.Indeterminate = false;
     }
-    
+
     private void FillFormatOptionButton(bool toggledOn)
     {
         string[] names = (toggledOn)
@@ -150,7 +150,7 @@ public partial class Mosic : Control
 
             FormatOptionButton.AddItem(label);
         }
-        
+
         if (toggledOn)
         {
             FormatOptionButton.SetItemText(0, "Original");
