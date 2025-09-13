@@ -1,10 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://bikmwh8lse7e"]
+[gd_scene load_steps=5 format=3 uid="uid://bikmwh8lse7e"]
 
 [ext_resource type="Script" uid="uid://baayyithks2m1" path="res://scripts/Mosic.cs" id="1_6c3jr"]
+[ext_resource type="Texture2D" uid="uid://ccelyg50wnec8" path="res://assets/icon_search.svg" id="2_nsumr"]
+[ext_resource type="Texture2D" uid="uid://cmxpbhyje7i0o" path="res://assets/icon_arrow_down.svg" id="3_k08je"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_k08je"]
 
-[node name="Mosic" type="Control" node_paths=PackedStringArray("SearchBar", "DownloadProgressBar", "SearchResultList", "FormatOptionButton", "UrlCheckButton", "VideoCheckButton", "DownloadPathDialogButton", "DownloadPathDialog")]
+[node name="Mosic" type="Control" node_paths=PackedStringArray("SearchBar", "SearchResultList", "SearchButton", "DownloadAVButton", "DownloadPlaylistButton", "DownloadProgressBar", "FormatOptionButton", "VideoCheckButton", "DownloadPathDialogButton", "DownloadPathDialog")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,10 +15,12 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_6c3jr")
 SearchBar = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/Search")
-DownloadProgressBar = NodePath("MarginContainer/BoxContainer/ProgressBar")
 SearchResultList = NodePath("MarginContainer/BoxContainer/Results")
+SearchButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/SearchButton")
+DownloadAVButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/DownloadAVButton")
+DownloadPlaylistButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/DownloadPlaylistButton")
+DownloadProgressBar = NodePath("MarginContainer/BoxContainer/ProgressBar")
 FormatOptionButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/FormatOptionButton")
-UrlCheckButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/UrlCheckButton")
 VideoCheckButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer2/VideoCheckButton")
 DownloadPathDialogButton = NodePath("MarginContainer/BoxContainer/BoxContainer/DownloadPathDialogButton")
 DownloadPathDialog = NodePath("MarginContainer/BoxContainer/BoxContainer/DownloadPathDialogButton/DownloadPathDialog")
@@ -51,11 +55,32 @@ theme_override_constants/separation = 5
 [node name="Search" type="LineEdit" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "SEARCH"
+placeholder_text = "SEARCH_PLACEHOLDER"
 clear_button_enabled = true
 caret_blink = true
 caret_blink_interval = 0.5
 metadata/_edit_use_anchors_ = true
+
+[node name="SearchButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer"]
+visible = false
+layout_mode = 2
+focus_mode = 0
+text = "SEARCH"
+icon = ExtResource("2_nsumr")
+
+[node name="DownloadAVButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer"]
+visible = false
+layout_mode = 2
+focus_mode = 0
+text = "DOWNLOAD_AUDIO"
+icon = ExtResource("3_k08je")
+
+[node name="DownloadPlaylistButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer"]
+visible = false
+layout_mode = 2
+focus_mode = 0
+text = "DOWNLOAD_PLAYLIST"
+icon = ExtResource("3_k08je")
 
 [node name="BoxContainer" type="BoxContainer" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer"]
 layout_mode = 2
@@ -108,6 +133,7 @@ focus_mode = 0
 
 [node name="DownloadPathDialogButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer"]
 layout_mode = 2
+focus_mode = 0
 text = "C:"
 
 [node name="DownloadPathDialog" type="FileDialog" parent="MarginContainer/BoxContainer/BoxContainer/DownloadPathDialogButton"]
