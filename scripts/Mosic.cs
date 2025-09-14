@@ -19,6 +19,8 @@ public partial class Mosic : Control
 
     private readonly IProgress<YoutubeDLSharp.DownloadProgress> _progress;
 
+    private MosicConfig _config;
+
     public Mosic()
     {
         _progress = new Progress<YoutubeDLSharp.DownloadProgress>(progress =>
@@ -39,7 +41,7 @@ public partial class Mosic : Control
     public Button SearchButton { get; set; }
 
     [Export]
-    public Button DownloadAVButton { get; set; }
+    public Button DownloadAvButton { get; set; }
 
     [Export]
     public Button DownloadPlaylistButton { get; set; }
@@ -67,23 +69,31 @@ public partial class Mosic : Control
         SearchBar.TextSubmitted += Search;
 
         SearchResultList.FixedIconSize = DisplayServer.ScreenGetSize() / 10;
-        SearchResultList.ItemActivated += index => DownloadVideo(_videos[(int) index].Url);
+        SearchResultList.ItemActivated += index => DownloadSingle(_videos[(int) index].Url);
 
         SearchButton.Pressed += () => Search(SearchBar.Text);
-        DownloadAVButton.Pressed += () => DownloadVideo(SearchBar.Text);
+        DownloadAvButton.Pressed += () => DownloadSingle(SearchBar.Text);
         DownloadPlaylistButton.Pressed += () => DownloadPlaylist(SearchBar.Text);
 
         FillFormatOptionButton(FormatOptionButton.ButtonPressed);
         VideoCheckButton.Toggled += FillFormatOptionButton;
 
-        DownloadPathDialogButton.Text = _ytdl.OutputFolder;
+        _config = (ResourceLoader.Exists(MosicConfig.Path))
+            ? ResourceLoader.Load<MosicConfig>(MosicConfig.Path)
+            : new MosicConfig();
+
+        _ytdl.OutputFileTemplate = _config.OutputFileTemplate;
+        _ytdl.OutputFolder = _config.OutputFolder;
+        DownloadPathDialogButton.Text = _config.OutputFolder;
         DownloadPathDialogButton.Pressed += () => DownloadPathDialog.PopupCentered();
 
         DownloadPathDialog.DirSelected += dir =>
         {
             string fullPath = Path.GetFullPath(dir);
-            _ytdl.OutputFolder = fullPath;
             DownloadPathDialogButton.Text = fullPath;
+            _ytdl.OutputFolder = fullPath;
+            _config.OutputFolder = fullPath;
+            ResourceSaver.Save(_config, MosicConfig.Path);
         };
     }
 
@@ -91,20 +101,20 @@ public partial class Mosic : Control
     {
         bool couldBeUrl = query.Contains("youtube.")
                           || query.Contains("youtu.be");
-        
+
         bool isWellFormedUrl = Uri.IsWellFormedUriString("https://" + query.TrimPrefix("https://"), UriKind.Absolute)
-            || Uri.IsWellFormedUriString("http://" + query.TrimPrefix("http://"), UriKind.Absolute);
-        
+                               || Uri.IsWellFormedUriString("http://" + query.TrimPrefix("http://"), UriKind.Absolute);
+
         if (couldBeUrl && isWellFormedUrl)
         {
             SearchButton.Visible = false;
             DownloadPlaylistButton.Visible = query.Contains("?list=") || query.Contains("&list=");
-            DownloadAVButton.Visible = query.Contains("/watch") || query.Contains("youtu.be");
+            DownloadAvButton.Visible = query.Contains("/watch") || query.Contains("youtu.be");
         }
         else
         {
             SearchButton.Visible = !string.IsNullOrWhiteSpace(query);
-            DownloadAVButton.Visible = false;
+            DownloadAvButton.Visible = false;
         }
     }
 
@@ -141,9 +151,9 @@ public partial class Mosic : Control
         SearchResultList.SetItemIcon(index, ImageTexture.CreateFromImage(image));
     }
 
-    private void DownloadVideo(string url) => _ = DownloadVideoAsync(url);
+    private void DownloadSingle(string url) => _ = DownloadSingleAsync(url);
 
-    private async Task DownloadVideoAsync(string url)
+    private async Task DownloadSingleAsync(string url)
     {
         DownloadProgressBar.Indeterminate = true;
 
@@ -162,7 +172,7 @@ public partial class Mosic : Control
     }
 
     private void DownloadPlaylist(string url) => _ = DownloadPlaylistAsync(url);
-    
+
     private async Task DownloadPlaylistAsync(string url)
     {
         DownloadProgressBar.Indeterminate = true;
@@ -207,12 +217,12 @@ public partial class Mosic : Control
 
         if (toggledOn)
         {
-            DownloadAVButton.Text = "DOWNLOAD_VIDEO";
+            DownloadAvButton.Text = "DOWNLOAD_VIDEO";
             FormatOptionButton.SetItemText(0, "Original");
         }
         else
         {
-            DownloadAVButton.Text = "DOWNLOAD_AUDIO";
+            DownloadAvButton.Text = "DOWNLOAD_AUDIO";
         }
     }
 }
