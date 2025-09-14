@@ -6,7 +6,7 @@
 
 [sub_resource type="LabelSettings" id="LabelSettings_k08je"]
 
-[node name="Mosic" type="Control" node_paths=PackedStringArray("SearchBar", "SearchResultList", "SearchButton", "DownloadAvButton", "DownloadPlaylistButton", "DownloadProgressBar", "FormatOptionButton", "VideoCheckButton", "DownloadPathDialogButton", "DownloadPathDialog")]
+[node name="Mosic" type="Control" node_paths=PackedStringArray("SearchBar", "SearchResultList", "SearchButton", "DownloadSingleButton", "DownloadPlaylistButton", "DownloadProgressBar", "FormatOptionButton", "VideoCheckButton", "DownloadPathDialogButton", "DownloadPathDialog")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -17,7 +17,7 @@ script = ExtResource("1_6c3jr")
 SearchBar = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/Search")
 SearchResultList = NodePath("MarginContainer/BoxContainer/Results")
 SearchButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/SearchButton")
-DownloadAvButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/DownloadAVButton")
+DownloadSingleButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/DownloadSingleButton")
 DownloadPlaylistButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/DownloadPlaylistButton")
 DownloadProgressBar = NodePath("MarginContainer/BoxContainer/ProgressBar")
 FormatOptionButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/FormatOptionButton")
@@ -68,7 +68,7 @@ focus_mode = 0
 text = "SEARCH"
 icon = ExtResource("2_nsumr")
 
-[node name="DownloadAVButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer"]
+[node name="DownloadSingleButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer"]
 visible = false
 layout_mode = 2
 focus_mode = 0

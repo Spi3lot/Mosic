@@ -17,17 +17,10 @@ public partial class Mosic : Control
 
     private readonly IList<YoutubeVideo> _videos = [];
 
-    private readonly IProgress<YoutubeDLSharp.DownloadProgress> _progress;
-
-    private MosicConfig _config;
+    private readonly MosicConfig _config = MosicConfig.Load();
 
     public Mosic()
     {
-        _progress = new Progress<YoutubeDLSharp.DownloadProgress>(progress =>
-        {
-            DownloadProgressBar.Value = progress.Progress;
-        });
-
         _youtubeSearchClient = new(_httpClient);
     }
 
@@ -41,7 +34,7 @@ public partial class Mosic : Control
     public Button SearchButton { get; set; }
 
     [Export]
-    public Button DownloadAvButton { get; set; }
+    public Button DownloadSingleButton { get; set; }
 
     [Export]
     public Button DownloadPlaylistButton { get; set; }
@@ -69,22 +62,25 @@ public partial class Mosic : Control
         SearchBar.TextSubmitted += Search;
 
         SearchResultList.FixedIconSize = DisplayServer.ScreenGetSize() / 10;
-        SearchResultList.ItemActivated += index => DownloadSingle(_videos[(int) index].Url);
+        SearchResultList.ItemActivated += index => Download(_videos[(int) index].Url, false);
 
         SearchButton.Pressed += () => Search(SearchBar.Text);
-        DownloadAvButton.Pressed += () => DownloadSingle(SearchBar.Text);
-        DownloadPlaylistButton.Pressed += () => DownloadPlaylist(SearchBar.Text);
+        DownloadSingleButton.Pressed += () => Download(SearchBar.Text, false);
+        DownloadPlaylistButton.Pressed += () => Download(SearchBar.Text, true);
 
+        FormatOptionButton.ItemSelected += index =>
+        {
+            if (VideoCheckButton.ButtonPressed) _config.VideoFormatIndex = (int) index;
+            else _config.AudioFormatIndex = (int) index;
+            _config.Save();
+        };
+        
         FillFormatOptionButton(FormatOptionButton.ButtonPressed);
         VideoCheckButton.Toggled += FillFormatOptionButton;
 
-        _config = (ResourceLoader.Exists(MosicConfig.Path))
-            ? ResourceLoader.Load<MosicConfig>(MosicConfig.Path)
-            : new MosicConfig();
-
         _ytdl.OutputFileTemplate = _config.OutputFileTemplate;
         _ytdl.OutputFolder = _config.OutputFolder;
-        DownloadPathDialogButton.Text = _config.OutputFolder;
+        DownloadPathDialogButton.Text = _ytdl.OutputFolder;
         DownloadPathDialogButton.Pressed += () => DownloadPathDialog.PopupCentered();
 
         DownloadPathDialog.DirSelected += dir =>
@@ -93,36 +89,42 @@ public partial class Mosic : Control
             DownloadPathDialogButton.Text = fullPath;
             _ytdl.OutputFolder = fullPath;
             _config.OutputFolder = fullPath;
-            ResourceSaver.Save(_config, MosicConfig.Path);
+            _config.Save();
         };
     }
 
     private void ToggleSearchDownload(string query)
     {
-        bool couldBeUrl = query.Contains("youtube.")
-                          || query.Contains("youtu.be");
+        bool containsYoutube = query.Contains("youtube.") || query.Contains("youtu.be");
 
-        bool isWellFormedUrl = Uri.IsWellFormedUriString("https://" + query.TrimPrefix("https://"), UriKind.Absolute)
-                               || Uri.IsWellFormedUriString("http://" + query.TrimPrefix("http://"), UriKind.Absolute);
+        bool isWellFormedUrl = Uri.IsWellFormedUriString($"https://{query.TrimPrefix("https://")}", UriKind.Absolute)
+                               || Uri.IsWellFormedUriString($"http://{query.TrimPrefix("http://")}", UriKind.Absolute);
 
-        if (couldBeUrl && isWellFormedUrl)
+        if (containsYoutube && isWellFormedUrl)
         {
             SearchButton.Visible = false;
             DownloadPlaylistButton.Visible = query.Contains("?list=") || query.Contains("&list=");
-            DownloadAvButton.Visible = query.Contains("/watch") || query.Contains("youtu.be");
+
+            DownloadSingleButton.Visible = query.Contains("youtu.be")
+                                           || query.Contains("/watch")
+                                           || query.Contains("/shorts");
         }
-        else
+
+
+        if (DownloadPlaylistButton.Visible || DownloadSingleButton.Visible)
         {
-            SearchButton.Visible = !string.IsNullOrWhiteSpace(query);
-            DownloadAvButton.Visible = false;
+            return;
         }
+
+        SearchButton.Visible = !string.IsNullOrWhiteSpace(query);
+        DownloadSingleButton.Visible = false;
     }
 
     private void Search(string query) => _ = SearchAsync(query);
 
     private async Task SearchAsync(string query)
     {
-        if (!SearchButton.Visible || string.IsNullOrWhiteSpace(query))
+        if (!SearchButton.Visible)
         {
             return;
         }
@@ -151,53 +153,41 @@ public partial class Mosic : Control
         SearchResultList.SetItemIcon(index, ImageTexture.CreateFromImage(image));
     }
 
-    private void DownloadSingle(string url) => _ = DownloadSingleAsync(url);
+    private void Download(string url, bool playlist) => _ = DownloadAsync(url, playlist);
 
-    private async Task DownloadSingleAsync(string url)
+    private async Task DownloadAsync(string url, bool playlist)
     {
         DownloadProgressBar.Indeterminate = true;
+        Task task;
 
         if (VideoCheckButton.ButtonPressed)
         {
             var format = (YoutubeDLSharp.Options.VideoRecodeFormat) FormatOptionButton.Selected;
-            await _ytdl.RunVideoDownload(url, recodeFormat: format, progress: _progress);
+
+            task = (playlist)
+                ? _ytdl.RunVideoPlaylistDownload(url, recodeFormat: format)
+                : _ytdl.RunVideoDownload(url, recodeFormat: format);
         }
         else
         {
             var format = (YoutubeDLSharp.Options.AudioConversionFormat) FormatOptionButton.Selected;
-            await _ytdl.RunAudioDownload(url, format: format, progress: _progress);
+
+            task = (playlist)
+                ? _ytdl.RunAudioDownload(url, format: format)
+                : _ytdl.RunAudioPlaylistDownload(url, format: format);
         }
 
+        await task;
         DownloadProgressBar.Indeterminate = false;
     }
 
-    private void DownloadPlaylist(string url) => _ = DownloadPlaylistAsync(url);
-
-    private async Task DownloadPlaylistAsync(string url)
+    private void FillFormatOptionButton(bool video)
     {
-        DownloadProgressBar.Indeterminate = true;
-
-        if (VideoCheckButton.ButtonPressed)
-        {
-            var format = (YoutubeDLSharp.Options.VideoRecodeFormat) FormatOptionButton.Selected;
-            await _ytdl.RunVideoPlaylistDownload(url, recodeFormat: format, progress: _progress);
-        }
-        else
-        {
-            var format = (YoutubeDLSharp.Options.AudioConversionFormat) FormatOptionButton.Selected;
-            await _ytdl.RunAudioPlaylistDownload(url, format: format, progress: _progress);
-        }
-
-        DownloadProgressBar.Indeterminate = false;
-    }
-
-    private void FillFormatOptionButton(bool toggledOn)
-    {
-        string[] names = (toggledOn)
+        FormatOptionButton.Clear();
+        
+        string[] names = (video)
             ? Enum.GetNames<YoutubeDLSharp.Options.VideoRecodeFormat>()
             : Enum.GetNames<YoutubeDLSharp.Options.AudioConversionFormat>();
-
-        FormatOptionButton.Clear();
 
         foreach (string formatName in names)
         {
@@ -215,14 +205,17 @@ public partial class Mosic : Control
             FormatOptionButton.AddItem(label);
         }
 
-        if (toggledOn)
+        if (video)
         {
-            DownloadAvButton.Text = "DOWNLOAD_VIDEO";
             FormatOptionButton.SetItemText(0, "Original");
+            FormatOptionButton.Selected = _config.VideoFormatIndex;
+            DownloadSingleButton.Text = "DOWNLOAD_VIDEO";
         }
         else
         {
-            DownloadAvButton.Text = "DOWNLOAD_AUDIO";
+            FormatOptionButton.Selected = _config.AudioFormatIndex;
+            DownloadSingleButton.Text = "DOWNLOAD_AUDIO";
         }
+        
     }
 }
