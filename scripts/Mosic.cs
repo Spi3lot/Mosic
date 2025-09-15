@@ -64,7 +64,7 @@ public partial class Mosic : Control
     public override void _Ready()
     {
         SearchBar.GrabFocus();
-        SearchBar.TextChanged += ToggleSearchDownload;
+        SearchBar.TextChanged += DetectSearchOrDownload;
         SearchBar.TextSubmitted += Search;
 
         SearchResultList.FixedIconSize = DisplayServer.ScreenGetSize() / 10;
@@ -76,11 +76,18 @@ public partial class Mosic : Control
 
         FormatOptionButton.ItemSelected += index =>
         {
-            if (VideoCheckButton.ButtonPressed) _config.VideoFormatIndex = (int) index;
-            else _config.AudioFormatIndex = (int) index;
+            if (VideoCheckButton.ButtonPressed)
+            {
+                _config.VideoFormatIndex = (int) index;
+            }
+            else
+            {
+                _config.AudioFormatIndex = (int) index;
+            }
+
             _config.Save();
         };
-        
+
         FillFormatOptionButton(FormatOptionButton.ButtonPressed);
         VideoCheckButton.Toggled += FillFormatOptionButton;
 
@@ -107,7 +114,7 @@ public partial class Mosic : Control
         };
     }
 
-    private void ToggleSearchDownload(string query)
+    private void DetectSearchOrDownload(string query)
     {
         bool containsYoutube = query.Contains("youtube.") || query.Contains("youtu.be");
 
@@ -123,15 +130,12 @@ public partial class Mosic : Control
                                            || query.Contains("/watch")
                                            || query.Contains("/shorts");
         }
-
-
-        if (DownloadPlaylistButton.Visible || DownloadSingleButton.Visible)
+        else
         {
-            return;
+            SearchButton.Visible = !string.IsNullOrWhiteSpace(query);
+            DownloadSingleButton.Visible = false;
+            DownloadPlaylistButton.Visible = false;
         }
-
-        SearchButton.Visible = !string.IsNullOrWhiteSpace(query);
-        DownloadSingleButton.Visible = false;
     }
 
     private void Search(string query) => _ = SearchAsync(query);
@@ -145,8 +149,8 @@ public partial class Mosic : Control
 
         _videos.Clear();
         SearchResultList.Clear();
-        DownloadProgressBar.Indeterminate = true;
-        var result = await _youtubeSearchClient.SearchAsync(query);
+        DownloadProgressBar.Visible = true;
+        var result = await _youtubeSearchClient.SearchAsync(query, 1);
         int index = 0;
 
         foreach (var video in result.Results)
@@ -157,7 +161,7 @@ public partial class Mosic : Control
             index++;
         }
 
-        DownloadProgressBar.Indeterminate = false;
+        DownloadProgressBar.Visible = false;
     }
 
     private async Task FetchAndSetThumbnail(int index, string thumbnailUrl)
@@ -171,7 +175,8 @@ public partial class Mosic : Control
 
     private async Task DownloadAsync(string url, bool playlist)
     {
-        DownloadProgressBar.Indeterminate = true;
+        DownloadProgressBar.Visible = true;
+        CancelDownloadButton.Visible = true;
         Task task;
 
         if (VideoCheckButton.ButtonPressed)
@@ -207,7 +212,7 @@ public partial class Mosic : Control
     private void FillFormatOptionButton(bool video)
     {
         FormatOptionButton.Clear();
-        
+
         string[] names = (video)
             ? Enum.GetNames<YoutubeDLSharp.Options.VideoRecodeFormat>()
             : Enum.GetNames<YoutubeDLSharp.Options.AudioConversionFormat>();
@@ -239,7 +244,6 @@ public partial class Mosic : Control
             FormatOptionButton.Selected = _config.AudioFormatIndex;
             DownloadSingleButton.Text = "DOWNLOAD_AUDIO";
         }
-        
     }
 
     public override void _ExitTree()
