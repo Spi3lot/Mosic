@@ -173,8 +173,8 @@ public partial class Mosic : Control
             var format = (YoutubeDLSharp.Options.AudioConversionFormat) FormatOptionButton.Selected;
 
             task = (playlist)
-                ? _ytdl.RunAudioDownload(url, format: format)
-                : _ytdl.RunAudioPlaylistDownload(url, format: format);
+                ? _ytdl.RunAudioPlaylistDownload(url, format: format)
+                : _ytdl.RunAudioDownload(url, format: format);
         }
 
         await task;
