@@ -78,6 +78,8 @@ public partial class Mosic : Control
         FillFormatOptionButton(FormatOptionButton.ButtonPressed);
         VideoCheckButton.Toggled += FillFormatOptionButton;
 
+        _ytdl.YoutubeDLPath = Path.Combine(MosicConfig.ProcessPath, _ytdl.YoutubeDLPath);
+        _ytdl.FFmpegPath = Path.Combine(MosicConfig.ProcessPath, _ytdl.FFmpegPath);
         _ytdl.OutputFileTemplate = _config.OutputFileTemplate;
         _ytdl.OutputFolder = _config.OutputFolder;
         DownloadPathDialogButton.Text = _ytdl.OutputFolder;

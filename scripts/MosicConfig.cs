@@ -6,7 +6,9 @@ public partial class MosicConfig : Resource
 {
     private const string Path = "user://config.tres";
 
-    [Export] public string OutputFolder { get; set; }
+    public static readonly string ProcessPath = System.IO.Path.GetDirectoryName(System.Environment.ProcessPath);
+
+    [Export] public string OutputFolder { get; set; } = ProcessPath;
 
     [Export] public string OutputFileTemplate { get; set; } = "%(title)s.%(ext)s";
 

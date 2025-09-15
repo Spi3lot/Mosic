@@ -25,7 +25,7 @@ public partial class CyclePaddedLabel : Label
         }
         
         Text = StaticText;
-        await YoutubeDLSharp.Utils.DownloadBinaries();
+        await YoutubeDLSharp.Utils.DownloadBinaries(true, MosicConfig.ProcessPath);
         CallDeferred(MethodName.Finish);
     }
 
