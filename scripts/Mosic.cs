@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Godot;
 using YoutubeSearchApi.Net.Models.Youtube;
@@ -18,6 +19,8 @@ public partial class Mosic : Control
     private readonly IList<YoutubeVideo> _videos = [];
 
     private readonly MosicConfig _config = MosicConfig.Load();
+
+    private CancellationTokenSource _cts = new();
 
     public Mosic()
     {
@@ -41,6 +44,9 @@ public partial class Mosic : Control
 
     [Export]
     public ProgressBar DownloadProgressBar { get; set; }
+
+    [Export]
+    public Button CancelDownloadButton { get; set; }
 
     [Export]
     public OptionButton FormatOptionButton { get; set; }
@@ -92,6 +98,12 @@ public partial class Mosic : Control
             _ytdl.OutputFolder = fullPath;
             _config.OutputFolder = fullPath;
             _config.Save();
+        };
+
+        CancelDownloadButton.Pressed += () =>
+        {
+            _cts.Cancel();
+            _cts = new CancellationTokenSource();
         };
     }
 
@@ -167,20 +179,29 @@ public partial class Mosic : Control
             var format = (YoutubeDLSharp.Options.VideoRecodeFormat) FormatOptionButton.Selected;
 
             task = (playlist)
-                ? _ytdl.RunVideoPlaylistDownload(url, recodeFormat: format)
-                : _ytdl.RunVideoDownload(url, recodeFormat: format);
+                ? _ytdl.RunVideoPlaylistDownload(url, recodeFormat: format, ct: _cts.Token)
+                : _ytdl.RunVideoDownload(url, recodeFormat: format, ct: _cts.Token);
         }
         else
         {
             var format = (YoutubeDLSharp.Options.AudioConversionFormat) FormatOptionButton.Selected;
 
             task = (playlist)
-                ? _ytdl.RunAudioPlaylistDownload(url, format: format)
-                : _ytdl.RunAudioDownload(url, format: format);
+                ? _ytdl.RunAudioPlaylistDownload(url, format: format, ct: _cts.Token)
+                : _ytdl.RunAudioDownload(url, format: format, ct: _cts.Token);
         }
 
-        await task;
-        DownloadProgressBar.Indeterminate = false;
+        try
+        {
+            await task;
+        }
+        catch (OperationCanceledException e)
+        {
+            GD.Print("Download cancelled.");
+        }
+        
+        CancelDownloadButton.Visible = false;
+        DownloadProgressBar.Visible = false;
     }
 
     private void FillFormatOptionButton(bool video)
@@ -219,5 +240,10 @@ public partial class Mosic : Control
             DownloadSingleButton.Text = "DOWNLOAD_AUDIO";
         }
         
+    }
+
+    public override void _ExitTree()
+    {
+        _cts.Cancel();
     }
 }
