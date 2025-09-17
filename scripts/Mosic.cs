@@ -199,12 +199,13 @@ public partial class Mosic : Control
         try
         {
             await task;
+            DisplayServer.Beep();
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
             GD.Print("Download cancelled.");
         }
-        
+
         CancelDownloadButton.Visible = false;
         DownloadProgressBar.Visible = false;
     }
