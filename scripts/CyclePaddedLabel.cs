@@ -1,3 +1,4 @@
+using System;
 using Godot;
 
 namespace Mosic.scripts;
@@ -5,28 +6,20 @@ namespace Mosic.scripts;
 [Tool]
 public partial class CyclePaddedLabel : Label
 {
-
     private int _paddingWidth;
 
     [Export]
-    public string StaticText { get; set; } = "Downloading";
+    public string StaticText { get; set; }
 
     [Export]
-    public int PaddingCycleLength { get; set; } = 3;
+    public int PaddingCycleLength { get; set; }
 
     [Export]
     public bool AllowZeroPadding { get; set; }
 
-    public override async void _Ready()
+    public override void _Ready()
     {
-        if (Engine.IsEditorHint())
-        {
-            return;
-        }
-        
         Text = StaticText;
-        await YoutubeDLSharp.Utils.DownloadBinaries(true, MosicConfig.ProcessPath);
-        CallDeferred(MethodName.Finish);
     }
 
     public override void _PhysicsProcess(double delta)
@@ -36,10 +29,4 @@ public partial class CyclePaddedLabel : Label
         int totalWidth = StaticText.Length + _paddingWidth + (AllowZeroPadding ? 0 : 1);
         Text = StaticText.PadRight(totalWidth, '.');
     }
-
-    private void Finish()
-    {
-        GetTree().ChangeSceneToFile("res://scenes/mosic.tscn");
-    }
-
 }

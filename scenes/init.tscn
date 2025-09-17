@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cselb5t5f7orx"]
 
-[ext_resource type="Script" uid="uid://detcsvbwe412g" path="res://scripts/CyclePaddedLabel.cs" id="1_wm5da"]
+[ext_resource type="Script" uid="uid://c2o0rdy3qevxx" path="res://scripts/DownloadingLabel.cs" id="1_wm5da"]
 
 [node name="Init" type="Control"]
 layout_mode = 3
@@ -24,11 +24,11 @@ vertical = true
 [node name="Downloading" type="Label" parent="BoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Downloading..."
+text = "Downloading."
 horizontal_alignment = 1
 script = ExtResource("1_wm5da")
-PaddingCycleLength = 4
-AllowZeroPadding = true
+StaticText = "Downloading"
+PaddingCycleLength = 3
 metadata/_edit_use_anchors_ = true
 
 [node name="ProgressBar" type="ProgressBar" parent="BoxContainer"]
