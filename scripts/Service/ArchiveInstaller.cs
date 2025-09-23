@@ -15,9 +15,6 @@ public class ArchiveInstaller : IInstaller
 
         switch (extension)
         {
-            case ".exe":
-                await File.WriteAllBytesAsync(path, bytes);
-                return path;
             case ".zip":
                 await File.WriteAllBytesAsync(path, bytes);
                 return await InstallZipAsync(path);
@@ -25,6 +22,13 @@ public class ArchiveInstaller : IInstaller
             case ".tar" or ".tgz":
                 return await InstallTarAsync(path, bytes, gzip: extension.EndsWith("gz"));
             default:
+                await File.WriteAllBytesAsync(path, bytes);
+
+                if (IsExecutable(bytes))
+                {
+                    return path;
+                }
+
                 GD.PushError($"Unknown update format: {extension}");
                 return null;
         }
@@ -84,12 +88,12 @@ public class ArchiveInstaller : IInstaller
 
             string destinationPath = Path.Combine(directory, entry.Name);
             await entry.ExtractToFileAsync(destinationPath, overwrite: true);
-            
+
             await using var fileStream = File.OpenRead(destinationPath);
             byte[] fileHeader = new byte[4];
-            int bytesRead = await fileStream.ReadAsync(fileHeader);
+            _ = await fileStream.ReadAsync(fileHeader);
 
-            if (bytesRead >= "MZ"u8.Length && IsExecutable(fileHeader))
+            if (IsExecutable(fileHeader))
             {
                 executablePath = destinationPath;
             }
@@ -103,13 +107,15 @@ public class ArchiveInstaller : IInstaller
 
     private static bool IsWindowsExecutable(byte[] bytes)
     {
-        return bytes[0] == (byte) 'M'
+        return bytes.Length >= 2
+               && bytes[0] == (byte) 'M'
                && bytes[1] == (byte) 'Z';
     }
 
     private static bool IsUnixExecutable(byte[] bytes)
     {
-        return bytes[0] == 0x7F
+        return bytes.Length >= 4
+               && bytes[0] == 0x7F
                && bytes[1] == (byte) 'E'
                && bytes[2] == (byte) 'L'
                && bytes[3] == (byte) 'F';
