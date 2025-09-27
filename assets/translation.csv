@@ -1,0 +1,11 @@
+﻿key;en;de
+SEARCH;Search;Suchen
+SEARCH_PLACEHOLDER;Search / Video URL / Playlist URL;Suchen / Video-URL / Playlist-URL
+DOWNLOAD_VIDEO;Video;Video
+DOWNLOAD_AUDIO;Audio;Audio
+DOWNLOAD_PLAYLIST;Playlist;Playlist
+CANCEL;Cancel;Abbrechen
+UPDATE_TITLE;Update available!;Update verfügbar!
+UPDATE_INFO;"Latest version: [color=green][b]{0}[/b][/color]
+Current version: [color=red][b]{1}[/b][/color]";"Neueste Version: [color=green][b]{0}[/b][/color]
+Aktuelle Version: [color=red][b]{1}[/b][/color]"
