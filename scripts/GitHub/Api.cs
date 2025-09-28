@@ -55,7 +55,7 @@ public static class Api
             return "???";
         }
 
-        public static async Task<string> InstallUpdateAsync(string downloadUrl)
+        public static async Task<string> DownloadAndInstallUpdateAsync(string downloadUrl)
         {
             string path = Path.Combine(MosicConfig.ProcessDirectory, Path.GetFileName(downloadUrl));
             byte[] bytes = await HttpClient.GetByteArrayAsync(downloadUrl);
