@@ -34,12 +34,13 @@ vertical = true
 
 [node name="DownloadLabel" type="Label" parent="MarginContainer/BoxContainer"]
 layout_mode = 2
-text = "Checking for updates.."
+text = "Checking for updates."
 script = ExtResource("2_2dfag")
 StaticText = "Checking for updates"
 PaddingChar = "."
 PaddingCycleLength = 4
 AllowZeroPadding = true
+metadata/_custom_type_script = "uid://b58rn8e7udq03"
 
 [node name="ProgressBar" type="ProgressBar" parent="MarginContainer/BoxContainer"]
 custom_minimum_size = Vector2(0, 30)
