@@ -1,15 +1,18 @@
-using System;
 using Godot;
 
-namespace Mosic.scripts;
+namespace Mosic.Scripts;
 
 [Tool]
+[GlobalClass]
 public partial class CyclePaddedLabel : Label
 {
     private int _paddingWidth;
 
     [Export]
     public string StaticText { get; set; }
+
+    [Export]
+    public string PaddingChar { get; set; }
 
     [Export]
     public int PaddingCycleLength { get; set; }
@@ -27,6 +30,6 @@ public partial class CyclePaddedLabel : Label
         _paddingWidth = (_paddingWidth + 1) % PaddingCycleLength;
         
         int totalWidth = StaticText.Length + _paddingWidth + (AllowZeroPadding ? 0 : 1);
-        Text = StaticText.PadRight(totalWidth, '.');
+        Text = StaticText.PadRight(totalWidth, (PaddingChar + ' ')[0]);
     }
 }
