@@ -1,9 +1,6 @@
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Godot;
-using Mosic.Scripts.Service;
 using YoutubeDLSharp;
 
 namespace Mosic.Scripts;
@@ -18,11 +15,6 @@ public partial class Setup : Control
 
     public override void _EnterTree()
     {
-        if (ReplacePredecessor())
-        {
-            return;
-        }
-
         UpdateWindow.UpdateAborted += async () =>
         {
             await DownloadBinariesAsync(MosicConfig.ProcessDirectory);
@@ -32,25 +24,6 @@ public partial class Setup : Control
         UpdateWindow.UpdateAvailable += () => DownloadLabel.StaticText = "Waiting for a decision";
         UpdateWindow.UpdateAccepted += () => DownloadLabel.StaticText = "Updating";
         _ = UpdateWindow.PopupIfUpdateAvailableAsync();
-    }
-
-    private static bool ReplacePredecessor()
-    {
-        string replacePath = OS.GetCmdlineUserArgs()
-            .Select(arg => arg.Split('='))
-            .Select(kv => KeyValuePair.Create(kv[0], kv[1]))
-            .Cast<KeyValuePair<string, string>?>()
-            .FirstOrDefault(pair => pair!.Value.Key == CmdlineUserArgs.Replace)
-            ?.Value;
-
-        if (replacePath == null)
-        {
-            return false;
-        }
-
-        File.Delete(replacePath);
-        GD.Print($"Deleted old version at {replacePath}.");
-        return true;
     }
 
     private async Task DownloadBinariesAsync(string directoryPath)

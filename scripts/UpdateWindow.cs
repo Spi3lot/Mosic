@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Godot;
+using Microsoft.VisualBasic.FileIO;
 using Mosic.Scripts.Service;
 using Newtonsoft.Json.Linq;
 
@@ -23,6 +26,12 @@ public partial class UpdateWindow : Window
 
     public async Task PopupIfUpdateAvailableAsync()
     {
+        if (ReplacePredecessor())
+        {
+            UpdateAborted?.Invoke();
+            return;
+        }
+        
         string extension = Path.GetExtension(OS.GetExecutablePath());
         var latestRelease = await GitHub.Api.Helper.GetLatestReleaseAsync();
         var asset = GitHub.Asset.FindByFileExtension(extension, latestRelease["assets"]);
@@ -46,6 +55,31 @@ public partial class UpdateWindow : Window
         SetupEventHandlers(asset["browser_download_url"]!.ToString());
         Popup();
         RequestAttention();
+    }
+
+    private static bool ReplacePredecessor()
+    {
+        string replacePath = OS.GetCmdlineUserArgs()
+            .Select(arg => arg.Split('='))
+            .Select(kv => KeyValuePair.Create(kv[0], kv[1]))
+            .Cast<KeyValuePair<string, string>?>()
+            .FirstOrDefault(pair => pair!.Value.Key == CmdlineUserArgs.Replace)
+            ?.Value;
+
+        if (replacePath == null)
+        {
+            return false;
+        }
+
+        FileSystem.DeleteFile(
+            replacePath,
+            UIOption.AllDialogs,
+            RecycleOption.SendToRecycleBin,
+            UICancelOption.DoNothing
+        );
+
+        GD.Print($"Moved old version from '{replacePath}' to recycle bin.");
+        return true;
     }
 
     private async Task SetupUiAsync(JToken latestRelease)
@@ -72,7 +106,7 @@ public partial class UpdateWindow : Window
 
             string replace = CmdlineUserArgs.Set(CmdlineUserArgs.Replace, MosicConfig.ProcessPath);
             string[] args = [..OS.GetCmdlineArgs(), CmdlineUserArgs.UserArgDelimiter, replace];
-            OS.CreateProcess(executablePath, args, openConsole: true);
+            OS.CreateProcess(executablePath, args);
             GetTree().Quit();
         };
     }
