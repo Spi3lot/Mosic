@@ -29,15 +29,7 @@ public partial class Setup : Control
             CallDeferred(MethodName.ChangeSceneToMain);
         };
 
-        UpdateWindow.UpdateAccepted += async downloadUrl =>
-        {
-            DownloadLabel.StaticText = "Updating";
-            string executablePath = await GitHub.Api.Helper.InstallUpdateAsync(downloadUrl);
-            string replace = CmdlineUserArgs.Set(CmdlineUserArgs.Replace, MosicConfig.ProcessPath);
-            OS.CreateProcess(executablePath, [$"{CmdlineUserArgs.UserArgDelimiter} {replace}"], openConsole: true);
-            GetTree().Quit();
-        };
-        
+        UpdateWindow.UpdateAccepted += () => DownloadLabel.StaticText = "Updating";
         _ = UpdateWindow.PopupIfUpdateAvailableAsync();
     }
 

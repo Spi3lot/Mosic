@@ -22,7 +22,15 @@ public class ArchiveInstaller : IInstaller
             case ".tar" or ".tgz":
                 return await InstallTarAsync(path, bytes, gzip: extension.EndsWith("gz"));
             default:
-                await File.WriteAllBytesAsync(path, bytes);
+                try
+                {
+                    await File.WriteAllBytesAsync(path, bytes);
+                }
+                catch (IOException ex)
+                {
+                    GD.PushError("Unable to install update: " + ex.Message);
+                    return null;
+                }
 
                 if (IsExecutable(bytes))
                 {

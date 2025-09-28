@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Godot;
+using Mosic.Scripts.Service;
 using Newtonsoft.Json.Linq;
 
 namespace Mosic.Scripts;
@@ -16,7 +17,7 @@ public partial class UpdateWindow : Window
 
     public event Action UpdateAborted;
 
-    public event Action<string> UpdateAccepted;
+    public event Action UpdateAccepted;
 
     public async Task PopupIfUpdateAvailableAsync()
     {
@@ -53,8 +54,23 @@ public partial class UpdateWindow : Window
 
     private void SetupEventHandlers(string downloadUrl)
     {
-        UpdateButton.Pressed += Hide;
-        UpdateButton.Pressed += () => UpdateAccepted?.Invoke(downloadUrl);
         CloseRequested += Hide + UpdateAborted;
+        UpdateButton.Pressed += Hide + UpdateAccepted;
+        
+        UpdateButton.Pressed += async () =>
+        {
+            string executablePath = await GitHub.Api.Helper.DownloadAndInstallUpdateAsync(downloadUrl);
+
+            if (executablePath == null)
+            {
+                UpdateAborted?.Invoke();
+                return;
+            }
+
+            string replace = CmdlineUserArgs.Set(CmdlineUserArgs.Replace, MosicConfig.ProcessPath);
+            string[] args = [..OS.GetCmdlineArgs(), CmdlineUserArgs.UserArgDelimiter, replace];
+            OS.CreateProcess(executablePath, args, openConsole: true);
+            GetTree().Quit();
+        };
     }
 }
