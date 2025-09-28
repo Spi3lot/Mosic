@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://cselb5t5f7orx"]
 
-[ext_resource type="Script" uid="uid://bk3ohvfowbnmh" path="res://scripts/Init.cs" id="1_h74cd"]
-[ext_resource type="Script" uid="uid://detcsvbwe412g" path="res://scripts/CyclePaddedLabel.cs" id="2_2dfag"]
-[ext_resource type="Script" uid="uid://cbxendntqiiwe" path="res://scripts/UpdateWindow.cs" id="2_cmtoo"]
+[ext_resource type="Script" uid="uid://s6vyfu4ho6dd" path="res://scripts/Setup.cs" id="1_h74cd"]
+[ext_resource type="Script" uid="uid://b58rn8e7udq03" path="res://scripts/CyclePaddedLabel.cs" id="2_2dfag"]
+[ext_resource type="Script" uid="uid://byws2wnnynocu" path="res://scripts/UpdateWindow.cs" id="2_cmtoo"]
 [ext_resource type="Texture2D" uid="uid://dbpuplcu5cew6" path="res://assets/AssetLib.svg" id="3_hgawr"]
 
 [node name="Init" type="Control" node_paths=PackedStringArray("DownloadLabel", "DownloadProgressBar", "UpdateWindow")]
@@ -48,6 +48,8 @@ layout_mode = 2
 size_flags_vertical = 4
 max_value = 3.0
 show_percentage = false
+indeterminate = true
+editor_preview_indeterminate = false
 
 [node name="UpdateWindow" type="Window" parent="." node_paths=PackedStringArray("UpdateInfoLabel", "UpdateButton")]
 oversampling_override = 1.0
