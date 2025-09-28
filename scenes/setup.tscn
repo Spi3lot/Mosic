@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://cselb5t5f7orx"]
 
-[ext_resource type="Script" uid="uid://s6vyfu4ho6dd" path="res://scripts/Setup.cs" id="1_h74cd"]
+[ext_resource type="Script" uid="uid://co61tghxy6c51" path="res://scripts/Setup.cs" id="1_h74cd"]
 [ext_resource type="Script" uid="uid://b58rn8e7udq03" path="res://scripts/CyclePaddedLabel.cs" id="2_2dfag"]
-[ext_resource type="Script" uid="uid://byws2wnnynocu" path="res://scripts/UpdateWindow.cs" id="2_cmtoo"]
+[ext_resource type="Script" uid="uid://cjeuymwo67bmm" path="res://scripts/UpdateWindow.cs" id="2_cmtoo"]
 [ext_resource type="Texture2D" uid="uid://dbpuplcu5cew6" path="res://assets/AssetLib.svg" id="3_hgawr"]
 
 [node name="Init" type="Control" node_paths=PackedStringArray("DownloadLabel", "DownloadProgressBar", "UpdateWindow")]
@@ -34,13 +34,12 @@ vertical = true
 
 [node name="DownloadLabel" type="Label" parent="MarginContainer/BoxContainer"]
 layout_mode = 2
-text = "Verifying"
+text = "Checking for updates.."
 script = ExtResource("2_2dfag")
-StaticText = "Verifying"
+StaticText = "Checking for updates"
 PaddingChar = "."
 PaddingCycleLength = 4
 AllowZeroPadding = true
-metadata/_custom_type_script = "uid://detcsvbwe412g"
 
 [node name="ProgressBar" type="ProgressBar" parent="MarginContainer/BoxContainer"]
 custom_minimum_size = Vector2(0, 30)
