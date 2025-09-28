@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Godot;
 using YoutubeSearchApi.Net.Models.Youtube;
 
-namespace Mosic.scripts;
+namespace Mosic.Scripts;
 
 public partial class Mosic : Control
 {
@@ -65,14 +65,14 @@ public partial class Mosic : Control
     {
         SearchBar.GrabFocus();
         SearchBar.TextChanged += DetectSearchOrDownload;
-        SearchBar.TextSubmitted += Search;
+        SearchBar.TextSubmitted += async text => await SearchAsync(text);
 
         SearchResultList.FixedIconSize = DisplayServer.ScreenGetSize() / 10;
-        SearchResultList.ItemActivated += index => Download(_videos[(int) index].Url, false);
+        SearchResultList.ItemActivated += async index => await DownloadAsync(_videos[(int) index].Url, false);
 
-        SearchButton.Pressed += () => Search(SearchBar.Text);
-        DownloadSingleButton.Pressed += () => Download(SearchBar.Text, false);
-        DownloadPlaylistButton.Pressed += () => Download(SearchBar.Text, true);
+        SearchButton.Pressed += async () => await SearchAsync(SearchBar.Text);
+        DownloadSingleButton.Pressed += async () => await DownloadAsync(SearchBar.Text, false);
+        DownloadPlaylistButton.Pressed += async () => await DownloadAsync(SearchBar.Text, true);
 
         FormatOptionButton.ItemSelected += index =>
         {
@@ -91,8 +91,8 @@ public partial class Mosic : Control
         FillFormatOptionButton(FormatOptionButton.ButtonPressed);
         VideoCheckButton.Toggled += FillFormatOptionButton;
 
-        _ytdl.YoutubeDLPath = Path.Combine(MosicConfig.ProcessPath, _ytdl.YoutubeDLPath);
-        _ytdl.FFmpegPath = Path.Combine(MosicConfig.ProcessPath, _ytdl.FFmpegPath);
+        _ytdl.YoutubeDLPath = Path.Combine(MosicConfig.ProcessDirectory, _ytdl.YoutubeDLPath);
+        _ytdl.FFmpegPath = Path.Combine(MosicConfig.ProcessDirectory, _ytdl.FFmpegPath);
         _ytdl.OutputFileTemplate = _config.OutputFileTemplate;
         _ytdl.OutputFolder = _config.OutputFolder;
         DownloadPathDialogButton.Text = _ytdl.OutputFolder;
@@ -138,8 +138,6 @@ public partial class Mosic : Control
         }
     }
 
-    private void Search(string query) => _ = SearchAsync(query);
-
     private async Task SearchAsync(string query)
     {
         if (!SearchButton.Visible)
@@ -157,21 +155,19 @@ public partial class Mosic : Control
         {
             _videos.Add(video);
             SearchResultList.AddItem($"{video.Title} | {video.Author} | {video.Duration}");
-            _ = FetchAndSetThumbnail(index, video.ThumbnailUrl);
+            _ = FetchAndSetThumbnailAsync(index, video.ThumbnailUrl);
             index++;
         }
 
         DownloadProgressBar.Visible = false;
     }
 
-    private async Task FetchAndSetThumbnail(int index, string thumbnailUrl)
+    private async Task FetchAndSetThumbnailAsync(int index, string thumbnailUrl)
     {
         var image = new Image();
         image.LoadJpgFromBuffer(await _httpClient.GetByteArrayAsync(thumbnailUrl));
         SearchResultList.SetItemIcon(index, ImageTexture.CreateFromImage(image));
     }
-
-    private void Download(string url, bool playlist) => _ = DownloadAsync(url, playlist);
 
     private async Task DownloadAsync(string url, bool playlist)
     {
@@ -250,5 +246,7 @@ public partial class Mosic : Control
     public override void _ExitTree()
     {
         _cts.Cancel();
+        _cts.Dispose();
+        _httpClient.Dispose();
     }
 }
