@@ -29,6 +29,7 @@ public partial class Setup : Control
             CallDeferred(MethodName.ChangeSceneToMain);
         };
 
+        UpdateWindow.UpdateAvailable += () => DownloadLabel.StaticText = "Waiting for a decision";
         UpdateWindow.UpdateAccepted += () => DownloadLabel.StaticText = "Updating";
         _ = UpdateWindow.PopupIfUpdateAvailableAsync();
     }

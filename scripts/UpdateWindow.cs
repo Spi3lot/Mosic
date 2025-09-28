@@ -16,6 +16,8 @@ public partial class UpdateWindow : Window
     public Button UpdateButton { get; set; }
 
     public event Action UpdateAborted;
+    
+    public event Action UpdateAvailable;
 
     public event Action UpdateAccepted;
 
@@ -39,6 +41,7 @@ public partial class UpdateWindow : Window
             return;
         }
 
+        UpdateAvailable?.Invoke();
         await SetupUiAsync(latestRelease);
         SetupEventHandlers(asset["browser_download_url"]!.ToString());
         Popup();
