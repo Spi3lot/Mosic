@@ -1,14 +1,21 @@
-﻿using Godot;
+﻿using System.IO;
+using Godot;
 
-namespace Mosic.scripts;
+namespace Mosic.Scripts;
 
 public partial class MosicConfig : Resource
 {
-    private const string Path = "user://config.tres";
+    private const string ConfigPath = "user://config.tres";
 
-    public static readonly string ProcessPath = System.IO.Path.GetDirectoryName(System.Environment.ProcessPath);
+    public static readonly string ProcessPath = OS.GetExecutablePath();
 
-    [Export] public string OutputFolder { get; set; } = ProcessPath;
+    public static readonly string ProcessDirectory = Path.GetDirectoryName(ProcessPath);
+
+    public static readonly string Digest = Godot.FileAccess.GetSha256(ProcessPath);
+
+    public static string Version { get; set; }
+
+    [Export] public string OutputFolder { get; set; } = ProcessDirectory;
 
     [Export] public string OutputFileTemplate { get; set; } = "%(title)s.%(ext)s";
 
@@ -16,9 +23,15 @@ public partial class MosicConfig : Resource
 
     [Export] public int VideoFormatIndex { get; set; }
 
-    public static MosicConfig Load() => (ResourceLoader.Exists(Path))
-        ? ResourceLoader.Load<MosicConfig>(Path)
-        : new MosicConfig();
+    public static MosicConfig Load()
+    {
+        return ResourceLoader.Exists(ConfigPath)
+            ? ResourceLoader.Load<MosicConfig>(ConfigPath)
+            : new MosicConfig();
+    }
 
-    public void Save() => ResourceSaver.Save(this, Path);
+    public void Save()
+    {
+        ResourceSaver.Save(this, ConfigPath);
+    }
 }
