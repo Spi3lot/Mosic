@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Godot;
+
 using Microsoft.VisualBasic.FileIO;
+
 using Mosic.Scripts.Service;
+
 using Newtonsoft.Json.Linq;
 
 namespace Mosic.Scripts;
@@ -19,7 +23,7 @@ public partial class UpdateWindow : Window
     public Button UpdateButton { get; set; }
 
     public event Action UpdateAborted;
-    
+
     public event Action UpdateAvailable;
 
     public event Action UpdateAccepted;
@@ -31,7 +35,7 @@ public partial class UpdateWindow : Window
             UpdateAborted?.Invoke();
             return;
         }
-        
+
         string extension = Path.GetExtension(OS.GetExecutablePath());
         var latestRelease = await GitHub.Api.Helper.GetLatestReleaseAsync();
         var asset = GitHub.Asset.FindByFileExtension(extension, latestRelease["assets"]);
@@ -93,7 +97,7 @@ public partial class UpdateWindow : Window
     {
         CloseRequested += Hide + UpdateAborted;
         UpdateButton.Pressed += Hide + UpdateAccepted;
-        
+
         UpdateButton.Pressed += async () =>
         {
             string executablePath = await GitHub.Api.Helper.DownloadAndInstallUpdateAsync(downloadUrl);
@@ -105,7 +109,7 @@ public partial class UpdateWindow : Window
             }
 
             string replace = CmdlineUserArgs.Set(CmdlineUserArgs.Replace, MosicConfig.ProcessPath);
-            string[] args = [..OS.GetCmdlineArgs(), CmdlineUserArgs.UserArgDelimiter, replace];
+            string[] args = [.. OS.GetCmdlineArgs(), CmdlineUserArgs.UserArgDelimiter, replace];
             OS.CreateProcess(executablePath, args);
             GetTree().Quit();
         };

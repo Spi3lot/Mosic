@@ -1,8 +1,11 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading.Tasks;
+
 using Godot;
+
 using Mosic.Scripts.Service;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -22,7 +25,7 @@ public static class Api
     public static class Helper
     {
         private static readonly System.Net.Http.HttpClient HttpClient = new();
-        
+
         private static readonly ArchiveInstaller Installer = new();
 
         static Helper()
@@ -61,13 +64,13 @@ public static class Api
             byte[] bytes = await HttpClient.GetByteArrayAsync(downloadUrl);
             return await Installer.InstallAsync(path, bytes);
         }
-        
+
         public static async Task<JToken> GetReleasesAsync()
         {
             string json = await HttpClient.GetStringAsync(Endpoint.Releases);
             return JsonConvert.DeserializeObject<JToken>(json);
         }
-        
+
         public static async Task<JToken> GetLatestReleaseAsync()
         {
             string json = await HttpClient.GetStringAsync(Endpoint.LatestRelease);
