@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -13,9 +12,16 @@ namespace Mosic.Scripts.GitHub;
 
 public static class Api
 {
-    private const string BaseUrl = "https://api.github.com/repos/Spi3lot/Mosic/";
+    private static class RepoUrl
+    {
+        public const string Mosic = "https://api.github.com/repos/Spi3lot/Mosic";
 
-    private static class Endpoint
+        public const string YtDlp = "https://api.github.com/repos/yt-dlp/yt-dlp";
+
+        public const string Ffmpeg = "https://api.github.com/repos/FFmpeg/FFmpeg";
+    }
+
+    private static class UrlEndpoint
     {
         public const string Releases = "releases";
 
@@ -30,7 +36,6 @@ public static class Api
 
         static Helper()
         {
-            HttpClient.BaseAddress = new Uri(BaseUrl);
             HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd(nameof(Mosic));
         }
 
@@ -67,13 +72,13 @@ public static class Api
 
         public static async Task<JToken> GetReleasesAsync()
         {
-            string json = await HttpClient.GetStringAsync(Endpoint.Releases);
+            string json = await HttpClient.GetStringAsync($"{RepoUrl.Mosic}/{UrlEndpoint.Releases}");
             return JsonConvert.DeserializeObject<JToken>(json);
         }
 
         public static async Task<JToken> GetLatestReleaseAsync()
         {
-            string json = await HttpClient.GetStringAsync(Endpoint.LatestRelease);
+            string json = await HttpClient.GetStringAsync($"{RepoUrl.Mosic}/{UrlEndpoint.LatestRelease}");
             return JsonConvert.DeserializeObject<JToken>(json);
         }
     }
