@@ -1,11 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://bikmwh8lse7e"]
+[gd_scene format=3 uid="uid://bikmwh8lse7e"]
 
-[ext_resource type="Script" uid="uid://baayyithks2m1" path="res://scripts/Mosic.cs" id="1_6c3jr"]
+[ext_resource type="Script" uid="uid://cc5r1q8fo7bpr" path="res://scripts/Mosic.cs" id="1_6c3jr"]
 [ext_resource type="Texture2D" uid="uid://ccelyg50wnec8" path="res://assets/icon_search.svg" id="2_nsumr"]
 [ext_resource type="Texture2D" uid="uid://dbpuplcu5cew6" path="res://assets/AssetLib.svg" id="4_mtl5j"]
 [ext_resource type="Texture2D" uid="uid://5o13jnoqfdtd" path="res://assets/Close.svg" id="5_pnthq"]
 
-[node name="Mosic" type="Control" node_paths=PackedStringArray("SearchBar", "SearchResultList", "SearchButton", "DownloadSingleButton", "DownloadPlaylistButton", "DownloadProgressBar", "CancelDownloadButton", "FormatOptionButton", "VideoCheckButton", "DownloadPathDialogButton", "DownloadPathDialog")]
+[node name="Mosic" type="Control" unique_id=824337556 node_paths=PackedStringArray("SearchBar", "SearchResultList", "SearchButton", "DownloadSingleButton", "DownloadPlaylistButton", "DownloadProgressBar", "CancelDownloadButton", "FormatOptionButton", "VideoCheckButton", "DownloadPathDialogButton", "DownloadPathDialog")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -25,7 +25,7 @@ VideoCheckButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContai
 DownloadPathDialogButton = NodePath("MarginContainer/BoxContainer/BoxContainer/DownloadPathDialogButton")
 DownloadPathDialog = NodePath("MarginContainer/BoxContainer/BoxContainer/DownloadPathDialogButton/DownloadPathDialog")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=664578105]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -37,22 +37,22 @@ theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="BoxContainer" type="BoxContainer" parent="MarginContainer"]
+[node name="BoxContainer" type="BoxContainer" parent="MarginContainer" unique_id=932677307]
 layout_mode = 2
 theme_override_constants/separation = 5
 vertical = true
 
-[node name="BoxContainer" type="BoxContainer" parent="MarginContainer/BoxContainer"]
+[node name="BoxContainer" type="BoxContainer" parent="MarginContainer/BoxContainer" unique_id=1866143085]
 layout_mode = 2
 theme_override_constants/separation = 5
 vertical = true
 
-[node name="BoxContainer" type="BoxContainer" parent="MarginContainer/BoxContainer/BoxContainer"]
+[node name="BoxContainer" type="BoxContainer" parent="MarginContainer/BoxContainer/BoxContainer" unique_id=833620897]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 5
 
-[node name="Search" type="LineEdit" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer"]
+[node name="Search" type="LineEdit" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=600270265]
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "SEARCH_PLACEHOLDER"
@@ -61,71 +61,71 @@ caret_blink = true
 caret_blink_interval = 0.5
 metadata/_edit_use_anchors_ = true
 
-[node name="SearchButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer"]
+[node name="SearchButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=662817639]
 visible = false
 layout_mode = 2
 focus_mode = 0
 text = "SEARCH"
 icon = ExtResource("2_nsumr")
 
-[node name="DownloadSingleButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer"]
+[node name="DownloadSingleButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=574791408]
 visible = false
 layout_mode = 2
 focus_mode = 0
 text = "DOWNLOAD_AUDIO"
 icon = ExtResource("4_mtl5j")
 
-[node name="DownloadPlaylistButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer"]
+[node name="DownloadPlaylistButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=1397514653]
 visible = false
 layout_mode = 2
 focus_mode = 0
 text = "DOWNLOAD_PLAYLIST"
 icon = ExtResource("4_mtl5j")
 
-[node name="BoxContainer" type="BoxContainer" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer"]
+[node name="BoxContainer" type="BoxContainer" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=1529241055]
 layout_mode = 2
 theme_override_constants/separation = 5
 vertical = true
 
-[node name="BoxContainer" type="BoxContainer" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer"]
+[node name="BoxContainer" type="BoxContainer" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=1296796031]
 layout_mode = 2
 theme_override_constants/separation = 5
 
-[node name="AudioLabel" type="Label" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer"]
+[node name="AudioLabel" type="Label" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=877403344]
 layout_mode = 2
 text = "Audio"
 
-[node name="VideoCheckButton" type="CheckButton" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer"]
+[node name="VideoCheckButton" type="CheckButton" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=140648504]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 6
 focus_mode = 0
 
-[node name="VideoLabel" type="Label" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer"]
+[node name="VideoLabel" type="Label" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=750874972]
 layout_mode = 2
 text = "Video"
 
-[node name="FormatOptionButton" type="OptionButton" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer"]
+[node name="FormatOptionButton" type="OptionButton" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=125774514]
 layout_mode = 2
 focus_mode = 0
 
-[node name="DownloadPathDialogButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer"]
+[node name="DownloadPathDialogButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer" unique_id=786242484]
 layout_mode = 2
 focus_mode = 0
 text = "C:"
 
-[node name="DownloadPathDialog" type="FileDialog" parent="MarginContainer/BoxContainer/BoxContainer/DownloadPathDialogButton"]
+[node name="DownloadPathDialog" type="FileDialog" parent="MarginContainer/BoxContainer/BoxContainer/DownloadPathDialogButton" unique_id=1433017738]
 title = "Open a Directory"
 ok_button_text = "Select Current Folder"
 file_mode = 2
 access = 2
 use_native_dialog = true
 
-[node name="BoxContainer2" type="BoxContainer" parent="MarginContainer/BoxContainer"]
+[node name="BoxContainer2" type="BoxContainer" parent="MarginContainer/BoxContainer" unique_id=1581112980]
 layout_mode = 2
 theme_override_constants/separation = 5
 
-[node name="ProgressBar" type="ProgressBar" parent="MarginContainer/BoxContainer/BoxContainer2"]
+[node name="ProgressBar" type="ProgressBar" parent="MarginContainer/BoxContainer/BoxContainer2" unique_id=2139170065]
 visible = false
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
@@ -136,14 +136,14 @@ show_percentage = false
 indeterminate = true
 editor_preview_indeterminate = false
 
-[node name="CancelDownloadButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer2"]
+[node name="CancelDownloadButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer2" unique_id=399202351]
 visible = false
 layout_mode = 2
 focus_mode = 0
 text = "CANCEL"
 icon = ExtResource("5_pnthq")
 
-[node name="Results" type="ItemList" parent="MarginContainer/BoxContainer"]
+[node name="Results" type="ItemList" parent="MarginContainer/BoxContainer" unique_id=686960560]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
