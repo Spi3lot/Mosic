@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 using Refit;
@@ -15,5 +16,5 @@ public interface IGitHubApi
     Task<GitHubRelease> GetLatestMosicReleaseAsync();
 
     [Get("")]
-    Task<byte[]> GetByteArrayAsync([Url] string url);
+    Task<Stream> GetStreamAsync([Url] string url);
 }

@@ -44,5 +44,13 @@ public static class GitHubApiExtensions
             byte[] bytes = await api.GetByteArrayAsync(downloadUrl);
             return await Installer.InstallAsync(path, bytes);
         }
+
+        public async Task<byte[]> GetByteArrayAsync(string url)
+        {
+            await using var networkStream = await api.GetStreamAsync(url);
+            await using var memoryStream = new MemoryStream();
+            await networkStream.CopyToAsync(memoryStream);
+            return memoryStream.ToArray();
+        }
     }
 }
