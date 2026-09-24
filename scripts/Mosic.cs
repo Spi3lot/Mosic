@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 using Godot;
 
 using YoutubeSearchApi.Net.Models.Youtube;
+using Microsoft.Extensions.DependencyInjection;
+
+using Mosic.Scripts.GitHub;
+using Mosic.Scripts.Service;
 
 namespace Mosic.Scripts;
 
@@ -21,6 +25,7 @@ public partial class Mosic : Control
     private readonly IList<YoutubeVideo> _videos = [];
 
     private readonly MosicConfig _config = MosicConfig.Load();
+    private readonly IGitHubApi _gitHubApi = ServiceManager.Provider.GetRequiredService<IGitHubApi>();
 
     private CancellationTokenSource _cts = new();
 
@@ -167,7 +172,7 @@ public partial class Mosic : Control
     private async Task FetchAndSetThumbnailAsync(int index, string thumbnailUrl)
     {
         var image = new Image();
-        image.LoadJpgFromBuffer(await _httpClient.GetByteArrayAsync(thumbnailUrl));
+        image.LoadJpgFromBuffer(await _gitHubApi.GetByteArrayAsync(thumbnailUrl));
         SearchResultList.SetItemIcon(index, ImageTexture.CreateFromImage(image));
     }
 
