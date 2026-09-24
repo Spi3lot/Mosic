@@ -1,6 +1,6 @@
 ﻿namespace Mosic.Scripts.GitHub;
 
-public static class Constants
+public static class GitHubConstants
 {
     public const string DefaultHashAlgorithm = "sha256";
 }
