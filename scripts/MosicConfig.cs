@@ -9,10 +9,9 @@ public partial class MosicConfig : Resource
     private const string ConfigPath = "user://config.tres";
 
     public static readonly string ProcessPath = OS.GetExecutablePath();
-
     public static readonly string ProcessDirectory = Path.GetDirectoryName(ProcessPath);
-
     public static readonly string Digest = Godot.FileAccess.GetSha256(ProcessPath);
+    public static readonly string FFmpegPath = Path.Combine(ProcessDirectory, OS.GetName() == "Windows" ? "ffmpeg.exe" : "ffmpeg");
 
     public static string Version { get; set; }
 
