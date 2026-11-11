@@ -1,25 +1,43 @@
-using System.IO;
+using System;
 using System.Threading.Tasks;
 
 using Godot;
 
-using YoutubeDLSharp;
+using Microsoft.Extensions.DependencyInjection;
+
+using Mosic.Scripts.Service;
 
 namespace Mosic.Scripts;
 
 public partial class Setup : Control
 {
+    private readonly IMediaDownloader _mediaDownloader = ServiceManager.Provider.GetRequiredService<IMediaDownloader>();
+
     [Export] public CyclePaddedLabel DownloadLabel { get; set; }
-
     [Export] public ProgressBar DownloadProgressBar { get; set; }
-
     [Export] public UpdateWindow UpdateWindow { get; set; }
 
     public override void _EnterTree()
     {
+        Engine.GetMainLoop().OnRequestPermissionsResult += (permission, granted) =>
+        {
+            GD.Print($"Permission {permission} was {(granted ? "granted" : "not granted")}");
+        };
+
+        if (OS.IsUserfsPersistent())
+        {
+            OS.RequestPermissions();
+        }
+
+        if (!_mediaDownloader.SupportsAutoUpdateAndSetup)
+        {
+            CallDeferred(MethodName.ChangeSceneToMain);
+            return;
+        }
+
         UpdateWindow.UpdateAborted += async () =>
         {
-            await DownloadBinariesAsync(MosicConfig.ProcessDirectory);
+            await DownloadBinariesAsync();
             CallDeferred(MethodName.ChangeSceneToMain);
         };
 
@@ -28,35 +46,18 @@ public partial class Setup : Control
         _ = UpdateWindow.PopupIfUpdateAvailableAsync();
     }
 
-    private async Task DownloadBinariesAsync(string directoryPath)
+    private async Task DownloadBinariesAsync()
     {
-        if (!File.Exists(Path.Combine(directoryPath, Utils.YtDlpBinaryName)))
-        {
-            DownloadLabel.StaticText = "Downloading yt-dlp";
-            await Utils.DownloadYtDlp(directoryPath);
-        }
+        DownloadLabel.StaticText = "Downloading FFmpeg";
+        DownloadProgressBar.Indeterminate = false;
 
-        DownloadProgressBar.Value = 1;
+        var progress = new Progress<double>(p =>
+            DownloadProgressBar.Value = Mathf.Lerp(DownloadProgressBar.MinValue, DownloadProgressBar.MaxValue, p));
 
-        if (!File.Exists(Path.Combine(directoryPath, Utils.FfmpegBinaryName)))
-        {
-            DownloadLabel.StaticText = "Downloading FFmpeg";
-            await Utils.DownloadFFmpeg(directoryPath);
-        }
-
-        DownloadProgressBar.Value = 2;
-
-        if (!File.Exists(Path.Combine(directoryPath, Utils.FfprobeBinaryName)))
-        {
-            DownloadLabel.StaticText = "Downloading FFprobe";
-            await Utils.DownloadFFprobe(directoryPath);
-        }
-
-        DownloadProgressBar.Value = 3;
+        await _mediaDownloader.EnsureDependenciesAsync(progress);
     }
 
-    private void ChangeSceneToMain()
-    {
-        GetTree().ChangeSceneToFile("res://scenes/mosic.tscn");
-    }
+    private void ChangeSceneToMain() =>
+        GetTree().CallDeferred(SceneTree.MethodName.ChangeSceneToFile, "res://scenes/mosic.tscn");
 }
+

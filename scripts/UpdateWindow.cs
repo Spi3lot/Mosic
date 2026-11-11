@@ -1,31 +1,30 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 using Godot;
 
+using Microsoft.Extensions.DependencyInjection;
+
+#if GODOT_WINDOWS
 using Microsoft.VisualBasic.FileIO;
+#endif
 
+using Mosic.Scripts.GitHub;
 using Mosic.Scripts.Service;
-
-using Newtonsoft.Json.Linq;
 
 namespace Mosic.Scripts;
 
 public partial class UpdateWindow : Window
 {
-    [Export]
-    public RichTextLabel UpdateInfoLabel { get; set; }
+    private readonly IGitHubApi _gitHubApi = ServiceManager.Provider.GetRequiredService<IGitHubApi>();
 
-    [Export]
-    public Button UpdateButton { get; set; }
+    [Export] public RichTextLabel UpdateInfoLabel { get; set; }
+    [Export] public Button UpdateButton { get; set; }
 
     public event Action UpdateAborted;
-
     public event Action UpdateAvailable;
-
     public event Action UpdateAccepted;
 
     public async Task PopupIfUpdateAvailableAsync()
@@ -37,11 +36,11 @@ public partial class UpdateWindow : Window
         }
 
         string extension = Path.GetExtension(OS.GetExecutablePath());
-        var latestRelease = await GitHub.Api.Helper.GetLatestReleaseAsync();
-        var asset = GitHub.Asset.FindByFileExtension(extension, latestRelease["assets"]);
-        var hash = GitHub.Asset.GetHash(asset);
+        var latestRelease = await _gitHubApi.GetLatestMosicReleaseAsync();
+        var asset = GitHubAsset.FindByFileExtension(extension, latestRelease.Assets);
+        var hash = asset.GetHash();
 
-        if (hash.Algorithm != GitHub.Constants.DefaultHashAlgorithm)
+        if (hash.Algorithm != GitHubConstants.DefaultHashAlgorithm)
         {
             GD.PushError($"Unknown hash algorithm: {hash.Algorithm}");
             UpdateAborted?.Invoke();
@@ -56,7 +55,7 @@ public partial class UpdateWindow : Window
 
         UpdateAvailable?.Invoke();
         await SetupUiAsync(latestRelease);
-        SetupEventHandlers(asset["browser_download_url"]!.ToString());
+        SetupEventHandlers(asset.BrowserDownloadUrl);
         Popup();
         RequestAttention();
     }
@@ -64,33 +63,35 @@ public partial class UpdateWindow : Window
     private static bool ReplacePredecessor()
     {
         string replacePath = OS.GetCmdlineUserArgs()
-            .Select(arg => arg.Split('='))
-            .Select(kv => KeyValuePair.Create(kv[0], kv[1]))
-            .Cast<KeyValuePair<string, string>?>()
-            .FirstOrDefault(pair => pair!.Value.Key == CmdlineUserArgs.Replace)
-            ?.Value;
+            .Select(arg => arg.Split('=', 2))
+            .FirstOrDefault(parts => parts is [CmdlineUserArgs.Replace, _])
+            ?[1];
 
         if (replacePath == null)
         {
             return false;
         }
 
+#if GODOT_WINDOWS
         FileSystem.DeleteFile(
             replacePath,
             UIOption.AllDialogs,
             RecycleOption.SendToRecycleBin,
             UICancelOption.DoNothing
         );
+#else
+        File.Delete(replacePath);
+#endif
 
         GD.Print($"Moved old version from '{replacePath}' to recycle bin.");
         return true;
     }
 
-    private async Task SetupUiAsync(JToken latestRelease)
+    private async Task SetupUiAsync(GitHubRelease latestRelease)
     {
         string info = Tr("UPDATE_INFO");
-        MosicConfig.Version = await GitHub.Api.Helper.DetermineCurrentVersionAsync();
-        UpdateInfoLabel.Text = string.Format(info, latestRelease["tag_name"], MosicConfig.Version);
+        MosicConfig.Version = await _gitHubApi.DetermineCurrentVersionAsync();
+        UpdateInfoLabel.Text = string.Format(info, latestRelease.TagName, MosicConfig.Version);
     }
 
     private void SetupEventHandlers(string downloadUrl)
@@ -100,7 +101,7 @@ public partial class UpdateWindow : Window
 
         UpdateButton.Pressed += async () =>
         {
-            string executablePath = await GitHub.Api.Helper.DownloadAndInstallUpdateAsync(downloadUrl);
+            string executablePath = await _gitHubApi.DownloadAndInstallUpdateAsync(downloadUrl);
 
             if (executablePath == null)
             {
