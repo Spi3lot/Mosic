@@ -1,29 +1,36 @@
 [gd_scene format=3 uid="uid://bikmwh8lse7e"]
 
 [ext_resource type="Script" uid="uid://cc5r1q8fo7bpr" path="res://scripts/Mosic.cs" id="1_6c3jr"]
+[ext_resource type="Theme" uid="uid://bghxdlowak4db" path="res://clean_dark.tres" id="1_pnthq"]
 [ext_resource type="Texture2D" uid="uid://ccelyg50wnec8" path="res://assets/icon_search.svg" id="2_nsumr"]
 [ext_resource type="Texture2D" uid="uid://dbpuplcu5cew6" path="res://assets/AssetLib.svg" id="4_mtl5j"]
 [ext_resource type="Texture2D" uid="uid://5o13jnoqfdtd" path="res://assets/Close.svg" id="5_pnthq"]
 
-[node name="Mosic" type="Control" unique_id=824337556 node_paths=PackedStringArray("SearchBar", "SearchResultList", "SearchButton", "DownloadSingleButton", "DownloadPlaylistButton", "DownloadProgressBar", "CancelDownloadButton", "FormatOptionButton", "VideoCheckButton", "DownloadPathDialogButton", "DownloadPathDialog")]
+[node name="Mosic" type="Control" unique_id=824337556 node_paths=PackedStringArray("RootMarginContainer", "HeaderContainer", "OptionsContainer", "SearchBar", "SearchResultContainer", "SearchButton", "DownloadSingleButton", "DownloadPlaylistButton", "DownloadProgressBar", "CancelDownloadButton", "FormatOptionButton", "VideoCheckButton", "StatusLabel", "DownloadPathDialogButton", "DownloadPathDialog")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_pnthq")
 script = ExtResource("1_6c3jr")
-SearchBar = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/Search")
-SearchResultList = NodePath("MarginContainer/BoxContainer/Results")
-SearchButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/SearchButton")
-DownloadSingleButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/DownloadSingleButton")
-DownloadPlaylistButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/DownloadPlaylistButton")
+RootMarginContainer = NodePath("MarginContainer")
+HeaderContainer = NodePath("MarginContainer/BoxContainer/BoxContainer/HeaderContainer")
+OptionsContainer = NodePath("MarginContainer/BoxContainer/BoxContainer/HeaderContainer/OptionsContainer")
+SearchBar = NodePath("MarginContainer/BoxContainer/BoxContainer/HeaderContainer/SearchRow/Search")
+SearchResultContainer = NodePath("MarginContainer/BoxContainer/ResultsScroll/Results")
+SearchButton = NodePath("MarginContainer/BoxContainer/BoxContainer/HeaderContainer/SearchRow/SearchButton")
+DownloadSingleButton = NodePath("MarginContainer/BoxContainer/BoxContainer/HeaderContainer/SearchRow/DownloadSingleButton")
+DownloadPlaylistButton = NodePath("MarginContainer/BoxContainer/BoxContainer/HeaderContainer/SearchRow/DownloadPlaylistButton")
 DownloadProgressBar = NodePath("MarginContainer/BoxContainer/BoxContainer2/ProgressBar")
 CancelDownloadButton = NodePath("MarginContainer/BoxContainer/BoxContainer2/CancelDownloadButton")
-FormatOptionButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/FormatOptionButton")
-VideoCheckButton = NodePath("MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/VideoCheckButton")
+FormatOptionButton = NodePath("MarginContainer/BoxContainer/BoxContainer/HeaderContainer/OptionsContainer/FormatOptionButton")
+VideoCheckButton = NodePath("MarginContainer/BoxContainer/BoxContainer/HeaderContainer/OptionsContainer/BoxContainer/VideoCheckButton")
+StatusLabel = NodePath("MarginContainer/BoxContainer/StatusLabel")
 DownloadPathDialogButton = NodePath("MarginContainer/BoxContainer/BoxContainer/DownloadPathDialogButton")
 DownloadPathDialog = NodePath("MarginContainer/BoxContainer/BoxContainer/DownloadPathDialogButton/DownloadPathDialog")
+DownloadIcon = ExtResource("4_mtl5j")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=664578105]
 layout_mode = 1
@@ -42,17 +49,38 @@ layout_mode = 2
 theme_override_constants/separation = 5
 vertical = true
 
+[node name="MenuBar" type="MenuBar" parent="MarginContainer/BoxContainer" unique_id=351877398]
+visible = false
+layout_mode = 2
+
+[node name="Theme" type="PopupMenu" parent="MarginContainer/BoxContainer/MenuBar" unique_id=781256851]
+oversampling_override = 1.0
+size = Vector2i(117, 100)
+item_count = 2
+item_0/text = "Theme1"
+item_0/checkable = 2
+item_0/checked = true
+item_0/id = 0
+item_1/text = "Theme2"
+item_1/checkable = 2
+item_1/id = 1
+
 [node name="BoxContainer" type="BoxContainer" parent="MarginContainer/BoxContainer" unique_id=1866143085]
 layout_mode = 2
 theme_override_constants/separation = 5
 vertical = true
 
-[node name="BoxContainer" type="BoxContainer" parent="MarginContainer/BoxContainer/BoxContainer" unique_id=833620897]
+[node name="HeaderContainer" type="BoxContainer" parent="MarginContainer/BoxContainer/BoxContainer" unique_id=833620897]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 5
 
-[node name="Search" type="LineEdit" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=600270265]
+[node name="SearchRow" type="BoxContainer" parent="MarginContainer/BoxContainer/BoxContainer/HeaderContainer" unique_id=1948271625]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="Search" type="LineEdit" parent="MarginContainer/BoxContainer/BoxContainer/HeaderContainer/SearchRow" unique_id=600270265]
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "SEARCH_PLACEHOLDER"
@@ -61,58 +89,61 @@ caret_blink = true
 caret_blink_interval = 0.5
 metadata/_edit_use_anchors_ = true
 
-[node name="SearchButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=662817639]
+[node name="SearchButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/HeaderContainer/SearchRow" unique_id=662817639]
 visible = false
 layout_mode = 2
 focus_mode = 0
 text = "SEARCH"
 icon = ExtResource("2_nsumr")
 
-[node name="DownloadSingleButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=574791408]
+[node name="DownloadSingleButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/HeaderContainer/SearchRow" unique_id=574791408]
 visible = false
 layout_mode = 2
 focus_mode = 0
 text = "DOWNLOAD_AUDIO"
 icon = ExtResource("4_mtl5j")
 
-[node name="DownloadPlaylistButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=1397514653]
+[node name="DownloadPlaylistButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer/HeaderContainer/SearchRow" unique_id=1397514653]
 visible = false
 layout_mode = 2
 focus_mode = 0
 text = "DOWNLOAD_PLAYLIST"
 icon = ExtResource("4_mtl5j")
 
-[node name="BoxContainer" type="BoxContainer" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=1529241055]
+[node name="OptionsContainer" type="BoxContainer" parent="MarginContainer/BoxContainer/BoxContainer/HeaderContainer" unique_id=1529241055]
 layout_mode = 2
 theme_override_constants/separation = 5
 vertical = true
 
-[node name="BoxContainer" type="BoxContainer" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=1296796031]
+[node name="BoxContainer" type="BoxContainer" parent="MarginContainer/BoxContainer/BoxContainer/HeaderContainer/OptionsContainer" unique_id=1296796031]
 layout_mode = 2
 theme_override_constants/separation = 5
 
-[node name="AudioLabel" type="Label" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=877403344]
+[node name="AudioLabel" type="Label" parent="MarginContainer/BoxContainer/BoxContainer/HeaderContainer/OptionsContainer/BoxContainer" unique_id=877403344]
 layout_mode = 2
 text = "Audio"
 
-[node name="VideoCheckButton" type="CheckButton" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=140648504]
+[node name="VideoCheckButton" type="CheckButton" parent="MarginContainer/BoxContainer/BoxContainer/HeaderContainer/OptionsContainer/BoxContainer" unique_id=140648504]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 6
 focus_mode = 0
 
-[node name="VideoLabel" type="Label" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=750874972]
+[node name="VideoLabel" type="Label" parent="MarginContainer/BoxContainer/BoxContainer/HeaderContainer/OptionsContainer/BoxContainer" unique_id=750874972]
 layout_mode = 2
 text = "Video"
 
-[node name="FormatOptionButton" type="OptionButton" parent="MarginContainer/BoxContainer/BoxContainer/BoxContainer/BoxContainer" unique_id=125774514]
+[node name="FormatOptionButton" type="OptionButton" parent="MarginContainer/BoxContainer/BoxContainer/HeaderContainer/OptionsContainer" unique_id=125774514]
 layout_mode = 2
+size_flags_horizontal = 3
 focus_mode = 0
 
 [node name="DownloadPathDialogButton" type="Button" parent="MarginContainer/BoxContainer/BoxContainer" unique_id=786242484]
 layout_mode = 2
 focus_mode = 0
 text = "C:"
+clip_text = true
+text_overrun_behavior = 3
 
 [node name="DownloadPathDialog" type="FileDialog" parent="MarginContainer/BoxContainer/BoxContainer/DownloadPathDialogButton" unique_id=1433017738]
 title = "Open a Directory"
@@ -120,6 +151,12 @@ ok_button_text = "Select Current Folder"
 file_mode = 2
 access = 2
 use_native_dialog = true
+
+[node name="StatusLabel" type="Label" parent="MarginContainer/BoxContainer" unique_id=1746291042]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.45, 0.45, 1)
+autowrap_mode = 3
 
 [node name="BoxContainer2" type="BoxContainer" parent="MarginContainer/BoxContainer" unique_id=1581112980]
 layout_mode = 2
@@ -143,9 +180,16 @@ focus_mode = 0
 text = "CANCEL"
 icon = ExtResource("5_pnthq")
 
-[node name="Results" type="ItemList" parent="MarginContainer/BoxContainer" unique_id=686960560]
+[node name="ResultsScroll" type="ScrollContainer" parent="MarginContainer/BoxContainer" unique_id=1686960560]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-focus_mode = 0
-metadata/_edit_use_anchors_ = true
+horizontal_scroll_mode = 0
+
+[node name="Results" type="BoxContainer" parent="MarginContainer/BoxContainer/ResultsScroll" unique_id=686960560]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+vertical = true
+

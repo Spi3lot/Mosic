@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json;
 
 using Godot;
@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Mosic.Scripts.GitHub;
 
 using Refit;
+
+using YoutubeExplode;
 
 namespace Mosic.Scripts.Service;
 
@@ -24,7 +26,14 @@ public partial class ServiceManager : Node
     {
         var services = new ServiceCollection();
 
+        services.AddSingleton<YoutubeClient>();
         services.AddSingleton<IInstaller, ArchiveInstaller>();
+
+#if GODOT_PC
+        services.AddSingleton<IMediaDownloader, DesktopMediaDownloader>();
+#else
+        services.AddSingleton<IMediaDownloader, AndroidMediaDownloader>();
+#endif
 
         services.AddRefitClient<IGitHubApi>(
                 new RefitSettings(new SystemTextJsonContentSerializer(JsonSerializerOptions)))

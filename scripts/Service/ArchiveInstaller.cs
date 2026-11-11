@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
+
 using Godot;
 
 namespace Mosic.Scripts.Service;
@@ -28,7 +29,7 @@ public class ArchiveInstaller : IInstaller
                 }
                 catch (IOException ex)
                 {
-                    GD.PushError("Unable to install update: " + ex.Message);
+                    GD.PushError($"Unable to install update: {ex.Message}");
                     return null;
                 }
 
@@ -55,14 +56,13 @@ public class ArchiveInstaller : IInstaller
         }
 
         string executablePath = null;
-        var tasks = new List<Task>();
+        List<Task> tasks = [];
 
         foreach (string file in reader.GetFiles())
         {
             string destinationPath = Path.Combine(directory, file);
             byte[] bytes = reader.ReadFile(file);
-            var task = File.WriteAllBytesAsync(destinationPath, bytes);
-            tasks.Add(task);
+            tasks.Add(File.WriteAllBytesAsync(destinationPath, bytes));
 
             if (IsExecutable(bytes))
             {
@@ -108,24 +108,10 @@ public class ArchiveInstaller : IInstaller
         }
 
         await stream.DisposeAsync();
-        return (executablePath != null) ? Path.GetFullPath(executablePath) : null;
+        return executablePath != null ? Path.GetFullPath(executablePath) : null;
     }
 
     private static bool IsExecutable(byte[] bytes) => IsWindowsExecutable(bytes) || IsUnixExecutable(bytes);
-
-    private static bool IsWindowsExecutable(byte[] bytes)
-    {
-        return bytes.Length >= 2
-               && bytes[0] == (byte) 'M'
-               && bytes[1] == (byte) 'Z';
-    }
-
-    private static bool IsUnixExecutable(byte[] bytes)
-    {
-        return bytes.Length >= 4
-               && bytes[0] == 0x7F
-               && bytes[1] == (byte) 'E'
-               && bytes[2] == (byte) 'L'
-               && bytes[3] == (byte) 'F';
-    }
+    private static bool IsWindowsExecutable(byte[] bytes) => bytes is [(byte) 'M', (byte) 'Z', ..];
+    private static bool IsUnixExecutable(byte[] bytes) => bytes is [0x7F, (byte) 'E', (byte) 'L', (byte) 'F', ..];
 }

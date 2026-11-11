@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,7 +13,8 @@ public record GitHubAsset(string Name, string Digest, string BrowserDownloadUrl)
 
     public (string Algorithm, string Digest) GetHash()
     {
-        string[] parts = Digest.Split(':');
-        return (parts[0], parts[1]);
+        return Digest?.Split(':', 2) is [var algorithm, var digest]
+            ? (algorithm, digest)
+            : (string.Empty, string.Empty);
     }
 }
